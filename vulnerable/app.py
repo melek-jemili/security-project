@@ -1,12 +1,20 @@
 """Application volontairement vulnérable, réservée à une démonstration locale."""
 
 from flask import Flask, abort, request, render_template, redirect, session, g
+import hashlib
+import hmac
 import sqlite3
 import os
+import re
+import secrets
+import time
 
 app = Flask(__name__)
 app.secret_key = "demo-secret-key-NOT-FOR-PRODUCTION"
 DB_PATH = os.path.join(os.path.dirname(__file__), "demo.db")
+DEMO_CARD_NUMBER = "4242424242424242"
+DEMO_CARD_CVC = "123"
+DEMO_OTP = "123456"
 
 PRODUCT_SEEDS = [
     ("MacBook Air 13″", "Ordinateurs", "1 399 €", "Fin, léger et rapide pour vous accompagner toute la journée.", "💻", 12),
@@ -40,6 +48,7 @@ def init_db():
     db = sqlite3.connect(DB_PATH)
     db.executescript(
         """
+        DROP TABLE IF EXISTS demo_checkouts;
         DROP TABLE IF EXISTS users;
         DROP TABLE IF EXISTS comments;
         DROP TABLE IF EXISTS products;
@@ -64,6 +73,15 @@ def init_db():
             product_id INTEGER NOT NULL REFERENCES products(id),
             author TEXT NOT NULL,
             content TEXT NOT NULL
+        );
+        CREATE TABLE demo_checkouts (
+            id TEXT PRIMARY KEY,
+            username TEXT NOT NULL,
+            product_id INTEGER NOT NULL REFERENCES products(id),
+            otp_hash TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'pending',
+            attempts INTEGER NOT NULL DEFAULT 0,
+            expires_at INTEGER NOT NULL
         );
         """
     )
@@ -96,6 +114,149 @@ def catalog():
         "SELECT * FROM products ORDER BY id"
     ).fetchall()
     return render_template("home.html", products=products)
+
+
+def checkout_page(product, phase, checkout_id=None, error=None):
+    return render_template(
+        "checkout.html",
+        product=product,
+        phase=phase,
+        checkout_id=checkout_id,
+        error=error,
+    )
+
+
+@app.route("/checkout/<int:product_id>")
+def checkout(product_id):
+    if "username" not in session:
+        return redirect("/login")
+    product = get_db().execute(
+        "SELECT * FROM products WHERE id = ?", (product_id,)
+    ).fetchone()
+    if product is None:
+        abort(404)
+    return checkout_page(product, "card")
+
+
+@app.route("/checkout/<int:product_id>/start", methods=["POST"])
+def start_checkout(product_id):
+    if "username" not in session:
+        return redirect("/login")
+    db = get_db()
+    product = db.execute(
+        "SELECT * FROM products WHERE id = ?", (product_id,)
+    ).fetchone()
+    if product is None:
+        abort(404)
+
+    card_number = request.form.get("card_number", "").replace(" ", "")
+    expiry = request.form.get("expiry", "")
+    cvc = request.form.get("cvc", "")
+    if (
+        card_number != DEMO_CARD_NUMBER
+        or cvc != DEMO_CARD_CVC
+        or not re.fullmatch(r"(0[1-9]|1[0-2])/[0-9]{2}", expiry)
+    ):
+        return checkout_page(
+            product,
+            "card",
+            error="Utilisez uniquement la carte fictive indiquée pour cette démo.",
+        ), 400
+
+    expiry_month, expiry_year = expiry.split("/")
+    current_time = time.gmtime()
+    if (2000 + int(expiry_year), int(expiry_month)) < (
+        current_time.tm_year,
+        current_time.tm_mon,
+    ):
+        return checkout_page(
+            product, "card", error="La date d’expiration est dépassée."
+        ), 400
+
+    checkout_id = secrets.token_urlsafe(32)
+    otp_hash = hashlib.sha256(
+        "{}:{}".format(checkout_id, DEMO_OTP).encode("utf-8")
+    ).hexdigest()
+    db.execute(
+        """
+        INSERT INTO demo_checkouts
+            (id, username, product_id, otp_hash, expires_at)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (
+            checkout_id,
+            session["username"],
+            product_id,
+            otp_hash,
+            int(time.time()) + 300,
+        ),
+    )
+    db.commit()
+    return checkout_page(product, "otp", checkout_id=checkout_id)
+
+
+@app.route("/checkout/verify", methods=["POST"])
+def verify_checkout():
+    if "username" not in session:
+        return redirect("/login")
+    checkout_id = request.form.get("checkout_id", "")
+    db = get_db()
+    checkout_record = db.execute(
+        """
+        SELECT * FROM demo_checkouts
+        WHERE id = ? AND username = ?
+        """,
+        (checkout_id, session["username"]),
+    ).fetchone()
+    if checkout_record is None:
+        abort(404)
+
+    product = db.execute(
+        "SELECT * FROM products WHERE id = ?", (checkout_record["product_id"],)
+    ).fetchone()
+    if checkout_record["status"] != "pending":
+        return checkout_page(
+            product, "otp", checkout_id=checkout_id,
+            error="Cette session de paiement n’est plus active.",
+        ), 400
+    if checkout_record["expires_at"] < int(time.time()):
+        db.execute(
+            "UPDATE demo_checkouts SET status = 'expired' WHERE id = ?",
+            (checkout_id,),
+        )
+        db.commit()
+        return checkout_page(
+            product, "otp", checkout_id=checkout_id,
+            error="Le code a expiré. Recommencez le paiement.",
+        ), 400
+
+    submitted_code = request.form.get("otp", "")
+    submitted_hash = hashlib.sha256(
+        "{}:{}".format(checkout_id, submitted_code).encode("utf-8")
+    ).hexdigest()
+    if not hmac.compare_digest(submitted_hash, checkout_record["otp_hash"]):
+        attempts = checkout_record["attempts"] + 1
+        status = "failed" if attempts >= 5 else "pending"
+        db.execute(
+            "UPDATE demo_checkouts SET attempts = ?, status = ? WHERE id = ?",
+            (attempts, status, checkout_id),
+        )
+        db.commit()
+        error = (
+            "Trop de tentatives. Recommencez le paiement."
+            if status == "failed"
+            else "Code incorrect. Vérifiez le code de démonstration."
+        )
+        return checkout_page(
+            product, "otp", checkout_id=checkout_id, error=error
+        ), 400
+
+    db.execute(
+        "UPDATE demo_checkouts SET status = 'completed' WHERE id = ?",
+        (checkout_id,),
+    )
+    db.commit()
+    return checkout_page(product, "success")
 
 
 # --------------------------------------------------------------------------

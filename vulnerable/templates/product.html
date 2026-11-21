@@ -10,7 +10,7 @@
     <p>{{ product['description'] }}</p>
     <p class="price">{{ product['price'] }}</p>
     <p class="stock">● En stock — expédition sous 24 à 48 h</p>
-    <button class="button" type="button" onclick="this.textContent='Ajouté au panier ✓'">Ajouter au panier</button>
+    <a class="button" href="/checkout/{{ product['id'] }}">Acheter</a>
   </div>
 </section>
 
