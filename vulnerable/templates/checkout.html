@@ -9,12 +9,6 @@
   {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
 
   {% if phase == "card" %}
-    <div class="notice">
-      Démonstration locale uniquement : utilisez la carte fictive
-      <strong>4242 4242 4242 4242</strong>, une date d’expiration future et le
-      code <strong>123</strong>. N’entrez jamais de vraie carte. Ces champs ne
-      sont pas conservés.
-    </div>
     <form method="post" action="/checkout/{{ product['id'] }}/start" style="margin-top:22px">
       <label for="card-number">Numéro de carte de test</label>
       <input id="card-number" name="card_number" inputmode="numeric" autocomplete="off"
@@ -28,10 +22,6 @@
       <button class="button" type="submit">Continuer</button>
     </form>
   {% elif phase == "otp" %}
-    <div class="notice">
-      Code OTP simulé : <strong>123456</strong>. Aucun SMS ni paiement réel
-      n’est envoyé. Le serveur vérifie le code avant de confirmer la commande.
-    </div>
     <form method="post" action="/checkout/verify" style="margin-top:22px">
       <input type="hidden" name="checkout_id" value="{{ checkout_id }}">
       <label for="otp">Code OTP de démonstration</label>
