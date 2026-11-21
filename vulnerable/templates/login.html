@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Connexion — NOVA{% endblock %}
+{% block content %}
+<section class="auth-layout">
+  <div class="auth-aside">
+    <div>
+      <span class="eyebrow">Bienvenue chez NOVA</span>
+      <h1>La bonne technologie commence ici.</h1>
+      <p>Connectez-vous pour découvrir notre sélection, enregistrer vos favoris et suivre votre espace personnel.</p>
+    </div>
+    <div class="auth-aside-mark" aria-hidden="true">✦</div>
+  </div>
+  <div class="auth-panel">
+    <span class="eyebrow">Votre espace client</span>
+    <h2>Ravi de vous revoir</h2>
+    <p class="muted">Entrez vos identifiants pour continuer.</p>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+    <form method="POST">
+      <label for="username">Adresse e-mail ou nom d’utilisateur</label>
+      <input id="username" name="username" autocomplete="username" placeholder="ex. alex@exemple.fr" required>
+      <label for="password">Mot de passe</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Votre mot de passe" required>
+      <button class="button" type="submit" style="width:100%;margin-top:8px">Se connecter</button>
+    </form>
+    <p class="form-foot">Nouveau chez NOVA ? <a class="text-link" href="/register">Créer un compte</a></p>
+    <p class="muted" style="margin-top:18px;font-size:12px">Comptes de démonstration : <code>admin</code> ou <code>melek</code>.</p>
+  </div>
+</section>
+{% endblock %}

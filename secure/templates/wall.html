@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Mur public</h2>
+<form method="POST">
+  <textarea name="content" rows="2" placeholder="Votre commentaire..."></textarea>
+  <button type="submit">Publier</button>
+</form>
+{% for c in comments %}
+  <div class="card">
+    <strong>{{ c['author'] }}</strong><br>
+    <!-- CORRIGE : pas de "| safe" -> Jinja2 echappe automatiquement le HTML -->
+    {{ c['content'] }}
+  </div>
+{% endfor %}
+<p style="font-size:12px;color:#888;">Le même payload &lt;img onerror=...&gt; s'affiche comme texte, sans s'exécuter.</p>
+{% endblock %}

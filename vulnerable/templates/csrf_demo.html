@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Préférences — NOVA{% endblock %}
+{% block content %}
+<span class="eyebrow">Mon compte</span>
+<h1 style="margin:8px 0;font-size:36px;letter-spacing:-.05em">Mes préférences</h1>
+<p class="muted">Personnalisez les produits que vous souhaitez retrouver dans votre espace.</p>
+<section class="card" style="max-width:680px;margin-top:24px;padding:26px">
+  <span class="category">Article favori actuel</span>
+  <h2 style="margin:8px 0 24px">{{ favorite['icon'] }} {{ favorite['name'] }}</h2>
+  <form method="POST" action="/preferences">
+    <label for="product_id">Choisir un nouvel article favori</label>
+    <select id="product_id" name="product_id">
+      {% for product in products %}
+        <option value="{{ product['id'] }}" {% if product['id'] == favorite['id'] %}selected{% endif %}>
+          {{ product['name'] }} — {{ product['price'] }}
+        </option>
+      {% endfor %}
+    </select>
+    <button class="button" type="submit">Enregistrer mes préférences</button>
+  </form>
+</section>
+{% endblock %}

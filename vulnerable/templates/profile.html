@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Mon profil — NOVA{% endblock %}
+{% block content %}
+<span class="eyebrow">Espace personnel</span>
+<h1 style="margin:8px 0 24px;font-size:36px;letter-spacing:-.05em">Profil de {{ user['username'] }}</h1>
+<section class="card" style="max-width:760px;padding:26px">
+  <h2 style="margin-top:0">À propos</h2>
+  <div class="muted">{{ user['bio'] | safe }}</div>
+  {% if is_owner %}
+    <form method="POST" style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line)">
+      <label for="bio">Votre présentation</label>
+      <textarea id="bio" name="bio" rows="4" placeholder="Quelques mots à propos de vous...">{{ user['bio'] }}</textarea>
+      <button class="button" type="submit">Enregistrer</button>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

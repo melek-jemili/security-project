@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Recherche — NOVA{% endblock %}
+{% block content %}
+<span class="eyebrow">Trouvez votre prochain essentiel</span>
+<h1 style="margin:8px 0;font-size:36px;letter-spacing:-.05em">Recherche</h1>
+<p class="muted">Parcourez notre sélection par nom, catégorie ou description.</p>
+<form class="search-form" method="GET">
+  <input name="q" value="{{ q }}" aria-label="Rechercher un produit" placeholder="Que recherchez-vous ?">
+  <button class="button" type="submit">Rechercher</button>
+</form>
+{% if q %}<p class="muted">Résultats pour : {{ q | safe }}</p>{% endif %}
+{% if results %}
+  <div class="grid">
+  {% for product in results %}
+    <article class="card product-card">
+      <div class="product-art" aria-hidden="true">{{ product['icon'] }}</div>
+      <div class="product-info">
+        <span class="category">{{ product['category'] }}</span>
+        <h2>{{ product['name'] }}</h2>
+        <p>{{ product['description'] }}</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <span class="price">{{ product['price'] }}</span>
+          <a class="button button-secondary" href="/product/{{ product['id'] }}">Voir le produit</a>
+        </div>
+      </div>
+    </article>
+  {% endfor %}
+  </div>
+{% elif q %}
+  <div class="card" style="padding:28px">
+    <h2>Aucun résultat pour cette recherche</h2>
+    <p class="muted">Essayez un autre nom ou parcourez le catalogue.</p>
+    <a class="button button-secondary" href="/catalog">Voir la boutique</a>
+  </div>
+{% endif %}
+{% endblock %}

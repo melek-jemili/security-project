@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Mon compte — NOVA{% endblock %}
+{% block content %}
+<span class="eyebrow">Espace personnel</span>
+<h1 style="margin:8px 0 28px;font-size:36px;letter-spacing:-.05em">Bonjour, {{ username }}</h1>
+<div class="grid">
+  <section class="card" style="padding:24px">
+    <span class="category">Votre favori</span>
+    <h2 style="margin-bottom:4px">{{ favorite['name'] }}</h2>
+    <p class="muted">Votre sélection enregistrée dans votre espace.</p>
+    <a class="button button-secondary" href="/product/{{ favorite['id'] }}">Voir le produit</a>
+  </section>
+  <section class="card" style="padding:24px">
+    <span class="category">Préférences</span>
+    <h2>Personnalisez votre espace</h2>
+    <p class="muted">Choisissez l’article que vous souhaitez garder en favori.</p>
+    <a class="button button-secondary" href="/csrf-demo">Gérer mes préférences</a>
+  </section>
+  <section class="card" style="padding:24px">
+    <span class="category">Profil</span>
+    <h2>Vos informations</h2>
+    <p class="muted">Consultez et mettez à jour votre profil.</p>
+    <a class="button button-secondary" href="/profile/{{ username }}">Voir mon profil</a>
+  </section>
+</div>
+{% endblock %}

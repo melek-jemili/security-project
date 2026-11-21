@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Boutique — NOVA{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <span class="eyebrow">La technologie, simplement</span>
+    <h1>Les essentiels tech. Bien choisis.</h1>
+    <p>Découvrez notre sélection d’appareils et d’accessoires pour travailler, créer et vous divertir.</p>
+    <a class="button" href="#selection" style="margin-top:22px">Découvrir la sélection</a>
+  </div>
+  <div class="hero-icon" aria-hidden="true">✨</div>
+</section>
+
+<div class="section-heading" id="selection">
+  <div>
+    <span class="eyebrow">Notre catalogue</span>
+    <h2>Les incontournables</h2>
+  </div>
+  <span class="muted">{{ products|length }} produits</span>
+</div>
+<div class="grid">
+{% for product in products %}
+  <article class="card product-card">
+    <div class="product-art" aria-hidden="true">{{ product['icon'] }}</div>
+    <div class="product-info">
+      <span class="category">{{ product['category'] }}</span>
+      <h2>{{ product['name'] }}</h2>
+      <p>{{ product['description'] }}</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <span class="price">{{ product['price'] }}</span>
+        <a class="button button-secondary" href="/product/{{ product['id'] }}">Voir le produit</a>
+      </div>
+    </div>
+  </article>
+{% endfor %}
+</div>
+{% endblock %}

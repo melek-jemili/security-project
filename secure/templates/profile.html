@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Profil de {{ user['username'] }}</h2>
+<div class="card">
+  <!-- CORRIGE : pas de "| safe" -> Jinja2 echappe automatiquement le HTML -->
+  {{ user['bio'] }}
+</div>
+{% if is_owner %}
+<h3>Modifier ma bio</h3>
+<form method="POST">
+  <textarea name="bio" rows="3">{{ user['bio'] }}</textarea>
+  <button type="submit">Enregistrer</button>
+</form>
+<p style="font-size:12px;color:#888;">Le même script saisi s'affiche ici comme texte brut, sans s'exécuter.</p>
+{% endif %}
+{% endblock %}

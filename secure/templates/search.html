@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Recherche d'utilisateurs</h2>
+<form method="GET">
+  <input name="q" value="{{ q }}" placeholder="nom d'utilisateur...">
+  <button type="submit">Rechercher</button>
+</form>
+{% if error %}<p class="error">Erreur SQL : {{ error }}</p>{% endif %}
+{% for r in results %}
+  <div class="card">
+    <strong>{{ r['username'] }}</strong><br>
+    <small>{{ r['bio'] }}</small>
+  </div>
+{% endfor %}
+<p style="font-size:12px;color:#888;">La même charge utile UNION SELECT échoue ici : requête paramétrée.</p>
+{% endblock %}

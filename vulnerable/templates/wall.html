@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Mur public</h2>
+<form method="POST">
+  <textarea name="content" rows="2" placeholder="Votre commentaire..."></textarea>
+  <button type="submit">Publier</button>
+</form>
+{% for c in comments %}
+  <div class="card">
+    <strong>{{ c['author'] }}</strong><br>
+    <!-- VULNERABLE : "| safe" desactive l'echappement HTML de Jinja2 -->
+    {{ c['content'] | safe }}
+  </div>
+{% endfor %}
+<p style="font-size:12px;color:#888;">Essaie par exemple : <code>&lt;img src=x onerror=alert('XSS')&gt;</code></p>
+{% endblock %}

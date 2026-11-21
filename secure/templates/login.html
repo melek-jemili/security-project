@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Connexion</h2>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<form method="POST">
+  <input name="username" placeholder="Nom d'utilisateur" autocomplete="off">
+  <input name="password" type="text" placeholder="Mot de passe">
+  <button type="submit">Se connecter</button>
+</form>
+<p style="font-size:12px;color:#888;">La même charge utile ('OR '1'='1') échoue ici : requête paramétrée.</p>
+{% endblock %}
