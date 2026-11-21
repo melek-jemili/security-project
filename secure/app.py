@@ -14,7 +14,7 @@ import sqlite3
 import os
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
+app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
 DB_PATH = os.path.join(os.path.dirname(__file__), "demo.db")
 
 

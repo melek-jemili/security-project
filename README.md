@@ -30,6 +30,17 @@ python app.py
 Ouvrir `http://127.0.0.1:5000` (redirection vers `/login`). La base SQLite est réinitialisée au démarrage
 avec les comptes fictifs `admin / SuperSecret123` et `melek / motdepasse1`.
 
+## Déploiement sur Render
+
+Le dépôt inclut `render.yaml` pour créer un **Web Service** Flask (pas un Static
+Site). Dans Render, créez un Blueprint depuis le dépôt et utilisez les valeurs
+du fichier. Elles installent les dépendances puis démarrent la version corrigée
+avec Gunicorn. `SECRET_KEY` est générée automatiquement par Render.
+
+La version vulnérable est volontairement réservée aux démonstrations locales ;
+ne l'exposez pas publiquement. Les données SQLite écrites par l'application
+hébergée ne sont pas garanties après un redémarrage ou un nouveau déploiement.
+
 ## Démonstrations
 
 1. **SQL Injection — `/login`**  
